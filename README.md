@@ -1,17 +1,23 @@
 # VetStudy AI Pro - Asistente de Estudio para Veterinaria
 
-Aplicación web progresiva (PWA) para el estudio de materias de veterinaria, diseñada como herramienta integral de aprendizaje con flashcards, cuestionarios, tutor IA y temporizador Pomodoro.
+> **Stack Tecnológico:** React 18 + TypeScript + Vite + Tailwind CSS + Express.js + Groq API (LLM)
+>
+> **Licencia:** Open Source - Libre para todos los estudiantes y educadores
 
-## 🎯 Estado del Proyecto
+Aplicación web progresiva (PWA) para el estudio de materias de veterinaria, diseñada como herramienta integral de aprendizaje con flashcards, cuestionarios, tutor IA potenciado por LLM y temporizador Pomodoro.
 
-**Tipo:** Frontend-only (Single Page Application)  
-**Arquitectura:** React + TypeScript + Vite - Aplicación 100% cliente, sin backend ni servidor API  
-**Estado:** ✅ Funcional y operativa para desarrollo local  
-**Persistencia:** localStorage (datos se almacenan en el navegador del usuario)
+## Estado del Proyecto
+
+**Tipo:** Full-Stack Application (React Frontend + Express Backend)
+**Arquitectura:** React SPA + API REST con integración a Groq (LLM)
+**Estado:** Funcional y operativa con IA real
+**Persistencia:** localStorage (frontend) + Groq API (respuestas IA)
 
 ---
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
+
+### Frontend
 
 | Tecnología | Versión | Uso |
 |------------|---------|-----|
@@ -25,6 +31,23 @@ Aplicación web progresiva (PWA) para el estudio de materias de veterinaria, dis
 | **date-fns** | ^3.0.0 | Manejo de fechas |
 | **lucide-react** | ^0.364.0 | Iconos |
 | **zod** | ^3.24.1 | Validación de esquemas |
+| **next-themes** | ^0.4.4 | Gestión de tema oscuro/claro |
+
+### Backend
+
+| Tecnología | Versión | Uso |
+|------------|---------|-----|
+| **Express.js** | ^4.18.2 | Framework servidor Node.js |
+| **CORS** | ^2.8.5 | Habilitar CORS para API |
+| **dotenv** | ^16.3.1 | Variables de entorno |
+| **concurrently** | ^8.2.2 | Ejecutar frontend y backend simultáneamente |
+
+### Inteligencia Artificial
+
+| Tecnología | Descripción |
+|------------|-------------|
+| **Groq API** | API de inferencia de alta velocidad |
+| **llama-3.3-70b-versatile** | Modelo LLM para respuestas del tutor |
 
 ---
 
@@ -51,7 +74,11 @@ vetstudy-ai-pro/
 ├── 📁 node_modules/             # Dependencias instaladas
 ├── 📁 public/                 # Assets estáticos públicos
 │
-└── 📁 src/                     # Código fuente principal
+├── 📁 server/                 # Backend Express.js
+│   ├── 📄 index.js            # Servidor API y integración Groq
+│   └── 📄 .env                # Variables de entorno (API keys)
+│
+└── 📁 src/                    # Código fuente principal
     ├── 📄 main.tsx             # Punto de entrada React
     ├── 📄 App.tsx              # Componente raíz con rutas
     ├── 📄 App.css              # Estilos globales de App
@@ -102,14 +129,14 @@ vetstudy-ai-pro/
 
 ---
 
-## 🚀 Funcionalidades por Módulo
+## Funcionalidades por Módulo
 
-### 1. 📚 **Dashboard** (`dashboard-page.tsx`)
+### 1. **Dashboard** (`dashboard-page.tsx`)
 - Panel principal con resumen de actividad
 - Accesos rápidos a todos los módulos
 - Estadísticas de estudio
 
-### 2. 🤖 **Tutor IA** (`tutor-page.tsx` + `use-chat.ts`)
+### 2. **Tutor IA** (`tutor-page.tsx` + `use-chat.ts`)
 - **Sistema de IA con memoria de conversación**
 - Responde preguntas sobre materias veterinarias:
   - **Virología**: Orthomyxovirus, Retrovirus (VIH), clasificación de Baltimore, replicación viral
@@ -118,13 +145,13 @@ vetstudy-ai-pro/
 - Detecta el tipo de pregunta: definición, proceso, ciclo de vida, clínica
 - **Mantiene contexto** entre mensajes para conversaciones coherentes
 
-### 3. 🎴 **Flashcards** (`flashcards-page.tsx` + `use-flashcards.ts`)
+### 3. **Flashcards** (`flashcards-page.tsx` + `use-flashcards.ts`)
 - Sistema de estudio con tarjetas
 - Soporte para tarjetas de opción múltiple y definición
 - Organización por materia
 - Tracking de progreso y dominio
 
-### 4. 📝 **Cuestionarios** (`quizzes-page.tsx` + `use-quizzes.ts`)
+### 4. **Cuestionarios** (`quizzes-page.tsx` + `use-quizzes.ts`)
 - Evaluaciones con múltiples tipos de preguntas:
   - Opción múltiple
   - Verdadero/Falso
@@ -132,28 +159,28 @@ vetstudy-ai-pro/
 - Sistema de puntuación y retroalimentación
 - Historial de resultados
 
-### 5. ⏱️ **Pomodoro** (`pomodoro-page.tsx` + `use-pomodoro.ts`)
+### 5. **Pomodoro** (`pomodoro-page.tsx` + `use-pomodoro.ts`)
 - Temporizador Pomodoro con sesiones de trabajo/descanso
 - Asociación de sesiones a materias específicas
 - Estadísticas de sesiones completadas
 
-### 6. 👤 **Perfil** (`profile-page.tsx`)
+### 6. **Perfil** (`profile-page.tsx`)
 - Información del usuario
 - Estadísticas de estudio globales
 - Gestión de preferencias
 
-### 7. ⚙️ **Configuración** (`settings-page.tsx`)
+### 7. **Configuración** (`settings-page.tsx`)
 - Gestión de materias/asignaturas (crear, editar, activar/desactivar)
 - Selector de tema (claro/oscuro)
 - Preferencias de estudio
 
-### 8. 📖 **Contenido** (`content-page.tsx`)
+### 8. **Contenido** (`content-page.tsx`)
 - Gestión de material de estudio organizado por materia
 - Estructura jerárquica de temas
 
 ---
 
-## 🧠 Sistema de Datos
+## Sistema de Datos
 
 **Almacenamiento:** Todo se guarda en `localStorage` del navegador
 
@@ -170,11 +197,13 @@ vetstudy-ai-pro/
 
 ---
 
-## 🏃‍♂️ Scripts Disponibles
+## Scripts Disponibles
 
 ```bash
 # Desarrollo local
-npm run dev              # Inicia servidor de desarrollo en localhost:5173
+npm run dev              # Inicia solo frontend (localhost:5173)
+npm run server           # Inicia solo backend API (localhost:3001)
+npm run dev:full         # Inicia frontend + backend simultáneamente
 
 # Build
 npm run build            # Compila para producción (genera /dist)
@@ -193,65 +222,72 @@ npm run clean            # Limpia node_modules y lockfiles
 
 ---
 
-## 🌐 Arquitectura de Comunicación
+## Arquitectura de Comunicación
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      NAVEGADOR WEB                          │
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │              VetStudy AI Pro (React SPA)                ││
-│  │  ┌─────────┐ ┌──────────┐ ┌───────────┐ ┌─────────────┐ ││
-│  │  │ Tutor   │ │Flashcards│ │ Cuestionarios│ │ Pomodoro │ ││
-│  │  │   IA    │ │          │ │             │ │          │ ││
-│  │  └────┬────┘ └──────────┘ └───────────┘ └─────────────┘ ││
-│  │       │                                                  ││
-│  │  ┌────▼───────────────────────────────────────────────┐  ││
-│  │  │           Custom Hooks (Lógica de Negocio)          │  ││
-│  │  │  useChat │ useFlashcards │ useQuizzes │ usePomodoro  │  ││
-│  │  └────┬────────────────────────────────────────────────┘  ││
-│  │       │                                                  ││
-│  │  ┌────▼───────────┐                                      ││
-│  │  │  localStorage  │  ← Persistencia local en el navegador ││
-│  │  └────────────────┘                                      ││
-│  └─────────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-
-⚠️ NOTA: No hay backend ni servidor API. Toda la lógica es cliente-side.
+┌─────────────────────────────────────────────────────────────────────────┐
+│                              NAVEGADOR WEB                                │
+│  ┌─────────────────────────────────────────────────────────────────────┐  │
+│  │                  VetStudy AI Pro (React SPA)                        │  │
+│  │  ┌─────────┐ ┌──────────┐ ┌───────────┐ ┌─────────────────────────┐ │  │
+│  │  │ Tutor   │ │Flashcards│ │Cuestionarios│ │      Pomodoro         │ │  │
+│  │  │   IA    │ │          │ │             │ │                       │ │  │
+│  │  └────┬────┘ └──────────┘ └───────────┘ └─────────────────────────┘ │  │
+│  │       │                                                             │  │
+│  │  ┌────▼──────────────────────────────────────────────────────────┐  │  │
+│  │  │              Custom Hooks (Lógica de Negocio)                  │  │  │
+│  │  │  useChat │ useFlashcards │ useQuizzes │ usePomodoro            │  │  │
+│  │  └────┬──────────────────────────────────────────────────────────┘  │  │
+│  │       │                                                             │  │
+│  │  ┌────▼───────────┐                                                 │  │
+│  │  │   localStorage │  ← Persistencia local (flashcards, quizzes...)  │  │
+│  │  └────────────────┘                                                 │  │
+│  └─────────────────────────────────────────────────────────────────────┘  │
+│                                    │                                      │
+│                                    │ fetch('/api/chat')                   │
+│                                    ▼                                      │
+│  ┌─────────────────────────────────────────────────────────────────────┐  │
+│  │                    SERVIDOR EXPRESS (localhost:3001)                  │  │
+│  │  ┌─────────────────────────────────────────────────────────────────┐  │  │
+│  │  │  POST /api/chat  →  Groq API (llama-3.3-70b-versatile)        │  │  │
+│  │  │  GET  /api/health → Health check                            │  │  │
+│  │  └─────────────────────────────────────────────────────────────────┘  │  │
+│  └─────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
+
+**Proxy Configurado:** Vite proxy redirige `/api` → `http://localhost:3001`
 
 ---
 
-## 🎓 Sistema de Tutor IA - Detalle Técnico
+## Sistema de Tutor IA - Detalle Técnico
 
-El Tutor IA implementado en `use-chat.ts` (22839 bytes) es un sistema **frontend-only** de generación de respuestas:
+El Tutor IA está conectado a **Groq API** utilizando el modelo **llama-3.3-70b-versatile** para generar respuestas académicas de nivel universitario en tiempo real.
 
 ### Flujo de Trabajo:
-1. **Análisis semántico** de la pregunta del usuario
-2. **Detección de entidades** científicas específicas
-3. **Clasificación de tipo de pregunta** (definición, proceso, ciclo, clínica)
-4. **Generación de respuesta** desde base de conocimiento local
-5. **Memoria de conversación** para mantener contexto entre mensajes
+1. Usuario envía pregunta desde el frontend (`tutor-page.tsx`)
+2. Frontend envía mensajes al backend Express (`server/index.js`)
+3. Backend agrega prompt del sistema con instrucciones académicas rigurosas
+4. Backend llama a Groq API con contexto de conversación completo
+5. Respuesta del LLM se devuelve al frontend y se renderiza con formato markdown
 
-### Entidades Soportadas:
-- **Virología**: orthomyxovirus, retrovirus, VIH, hepatitis, herpesvirus, coronavirus
-- **Parasitología**: Fasciola, Leishmania, Toxocara, Giardia
-- **Preparado para**: Ecología, Cinematografía, Literatura, Inglés
-
-### Características:
-- Respuestas estructuradas a nivel universitario
-- Formato Markdown con emojis para legibilidad
-- Detección de preguntas de seguimiento
-- Expansión contextual automática
+### Características del Sistema:
+- **IA Real:** Respuestas generadas por LLM (no predefinidas)
+- **Contexto Conversacional:** Mantiene historial de mensajes para respuestas coherentes
+- **Especialización por Materia:** Prompt del sistema adapta el tono según la materia seleccionada
+- **Formato Académico:** Respuestas estructuradas con markdown, emojis organizadores, y puntos clave para examen
+- **Preguntas de Seguimiento:** El tutor siempre termina con una pregunta que invita a profundizar
 
 ---
 
-## 🔧 Configuración de Desarrollo
+## Configuración de Desarrollo
 
 ### Requisitos:
 - Node.js 18+
 - pnpm (instalado automáticamente por el proyecto)
 
 ### Instalación:
+
 ```bash
 # 1. Clonar o navegar al proyecto
 cd vetstudy-ai-pro
@@ -259,10 +295,27 @@ cd vetstudy-ai-pro
 # 2. Instalar dependencias
 npm run install-deps
 
-# 3. Iniciar desarrollo
-npm run dev
+# 3. Configurar variables de entorno
+# Crear archivo server/.env con tu API key de Groq:
+echo "GROQ_API_KEY=tu_api_key_aqui" > server/.env
+echo "PORT=3001" >> server/.env
 
-# 4. Abrir navegador en http://localhost:5173
+# 4. Iniciar desarrollo completo (frontend + backend)
+npm run dev:full
+
+# 5. Abrir navegador en http://localhost:5173
+```
+
+**Obtén tu API key gratuita en:** https://console.groq.com
+
+**Para desarrollo solo frontend:**
+```bash
+npm run dev  # Solo frontend en localhost:5173
+```
+
+**Para desarrollo solo backend:**
+```bash
+npm run server  # Solo API en localhost:3001
 ```
 
 ### Configuración shadcn/ui:
@@ -272,7 +325,7 @@ npm run dev
 
 ---
 
-## 📦 Build de Producción
+## Build de Producción
 
 ```bash
 npm run build
@@ -285,16 +338,16 @@ Genera la carpeta `dist/` con:
 
 ---
 
-## 🚧 Limitaciones Conocidas
+## Limitaciones Conocidas
 
-1. **Sin Backend**: No hay sincronización entre dispositivos. Los datos viven solo en el navegador local.
+1. **Sin Sincronización en la Nube**: Los datos viven solo en el navegador local. No hay persistencia en servidor ni sincronización entre dispositivos.
 2. **Sin Autenticación**: No hay sistema de usuarios/login.
-3. **AI Simulada**: El "Tutor IA" usa lógica de patrones, no LLM real. Las respuestas están predefinidas para términos conocidos y usa frameworks académicos genéricos para términos desconocidos.
-4. **Persistencia Local**: Borrar datos del navegador = pérdida de todo el progreso.
+3. **Requiere API Key**: Para usar el Tutor IA se necesita una API key de Groq (gratuita con límites generosos).
+4. **Persistencia Local**: Borrar datos del navegador = pérdida de todo el progreso de flashcards, quizzes y historial de chat.
 
 ---
 
-## 🔄 Flujo de Datos - Ejemplo
+## Flujo de Datos - Ejemplo
 
 ```
 Usuario crea Flashcard
@@ -310,23 +363,34 @@ UI actualiza automáticamente
 
 ---
 
-## 🎯 Roadmap Sugerido
+## Roadmap Sugerido
 
-- [ ] Implementar backend real con API REST
+- [x] ~~Integración con LLM real (Groq API)~~ [COMPLETADO]
 - [ ] Sistema de autenticación de usuarios
-- [ ] Sincronización en la nube
-- [ ] Integración con LLM real (OpenAI/Anthropic) para respuestas dinámicas
-- [ ] App móvil nativa (React Native)
+- [ ] Sincronización en la nube con base de datos
 - [ ] Modo offline completo con Service Workers
 - [ ] Exportación/importación de datos
+- [ ] App móvil nativa (React Native)
+- [ ] Soporte para más idiomas
 
 ---
 
 ## 📄 Licencia
 
-Proyecto privado - Propiedad del desarrollador.
+**MIT License - Open Source**
+
+Este proyecto es **libre y gratuito** para todos los estudiantes, educadores y desarrolladores.
+
+- [ ] Uso personal y educativo ilimitado
+- [ ] Uso comercial permitido
+- [ ] Modificación y distribución permitidas
+- [ ] Sublicenciamiento permitido
+
+**Condiciones:** Mantener atribución al autor original.
 
 ---
+
+**Desarrollado con amor para la comunidad educativa veterinaria mundial.**
 
 **Última actualización:** Febrero 2026  
 **Versión actual:** 0.0.0 (desarrollo activo)
