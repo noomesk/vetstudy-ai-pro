@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useSubjects } from './use-subjects';
 
 export type QuestionType = 'multiple-choice' | 'true-false' | 'fill-blank' | 'matching';
@@ -424,6 +424,33 @@ const mockQuizzes: Quiz[] = [
   }
 ];
 
+const ATTEMPTS_STORAGE_KEY = 'vetstudy-quiz-attempts';
+
+const loadAttemptsFromStorage = (): QuizAttempt[] | null => {
+  try {
+    const saved = localStorage.getItem(ATTEMPTS_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Convert date strings back to Date objects
+      return parsed.map((attempt: any) => ({
+        ...attempt,
+        completedAt: new Date(attempt.completedAt),
+      }));
+    }
+  } catch (error) {
+    console.error('Error loading quiz attempts from storage:', error);
+  }
+  return null;
+};
+
+const saveAttemptsToStorage = (attempts: QuizAttempt[]) => {
+  try {
+    localStorage.setItem(ATTEMPTS_STORAGE_KEY, JSON.stringify(attempts));
+  } catch (error) {
+    console.error('Error saving quiz attempts to storage:', error);
+  }
+};
+
 export const useQuizzes = () => {
   const { activeSubjects } = useSubjects();
   const [quizzes] = useState<Quiz[]>(() => generateQuizzesForSubjects(activeSubjects));
@@ -432,8 +459,13 @@ export const useQuizzes = () => {
   const [answers, setAnswers] = useState<Record<string, string | number | string[]>>({});
   const [isQuizActive, setIsQuizActive] = useState(false);
   const [quizStartTime, setQuizStartTime] = useState<Date | null>(null);
-  const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
+  const [attempts, setAttempts] = useState<QuizAttempt[]>(() => loadAttemptsFromStorage() || []);
   const [showResults, setShowResults] = useState(false);
+
+  // Persist attempts to localStorage whenever they change
+  useEffect(() => {
+    saveAttemptsToStorage(attempts);
+  }, [attempts]);
 
   // Get current question
   const currentQuestion = currentQuiz?.questions[currentQuestionIndex];

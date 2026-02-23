@@ -41,18 +41,11 @@ export const useChat = () => {
     'Dame un repaso completo para mi examen',
   ];
 
-  // Función para obtener el nombre de la materia
-  const getSubjectName = (subjectId: string): string => {
-    const subjectNames: Record<string, string> = {
-      virology: 'Virología',
-      parasitology: 'Parasitología',
-      anatomy: 'Anatomía',
-      physiology: 'Fisiología',
-      pharmacology: 'Farmacología',
-      pathology: 'Patología',
-    };
-    return subjectNames[subjectId] || 'General';
-  };
+  // Función para obtener el nombre de la materia dinámicamente desde activeSubjects
+  const getSubjectName = useCallback((subjectId: string): string => {
+    const subject = activeSubjects.find(s => s.id === subjectId);
+    return subject?.name || 'General';
+  }, [activeSubjects]);
 
   // Función para enviar mensaje a la API
   const sendMessage = useCallback(async () => {
