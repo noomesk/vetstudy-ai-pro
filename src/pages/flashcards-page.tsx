@@ -47,21 +47,62 @@ const FlashcardsPage: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newCard, setNewCard] = useState({ front: '', back: '', subject: '' });
 
+  const [showCompletionScreen, setShowCompletionScreen] = useState(false);
+
   const handleDifficultyRating = (difficulty: 'easy' | 'medium' | 'hard') => {
     const quality = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 3 : 1;
     rateCard(quality);
+    // Check if this was the last card
+    if (currentCardIndex >= cardsToReview.length - 1) {
+      setShowCompletionScreen(true);
+    }
   };
 
-  if (!currentCard) {
+  const handleReset = () => {
+    setShowCompletionScreen(false);
+    resetSession();
+  };
+
+  if (showCompletionScreen || !currentCard) {
     return (
       <div className="space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-foreground mb-4">¡Felicidades!</h1>
-          <p className="text-muted-foreground mb-8">Has completado todas las flashcards disponibles para repasar hoy.</p>
-          <Button onClick={resetSession} className="bg-gradient-to-r from-blue-500 to-green-600">
-            <RotateCcw className="mr-2 h-4 w-4" />
-            Reiniciar Sesión
-          </Button>
+          <p className="text-muted-foreground mb-4">Has completado todas las flashcards disponibles para repasar hoy.</p>
+          
+          {/* Show completion stats */}
+          <div className="bg-muted p-6 rounded-lg max-w-md mx-auto mb-6">
+            <h3 className="text-lg font-semibold mb-4">Resumen de la sesión</h3>
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <p className="text-2xl font-bold text-blue-600">{studySession.cardsStudied}</p>
+                <p className="text-sm text-muted-foreground">Tarjetas estudiadas</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-green-600">{studySession.correctAnswers}</p>
+                <p className="text-sm text-muted-foreground">Respuestas correctas</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-purple-600">{Math.round((studySession.correctAnswers / Math.max(studySession.cardsStudied, 1)) * 100)}%</p>
+                <p className="text-sm text-muted-foreground">Precisión</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-orange-600">{getSessionTime()}</p>
+                <p className="text-sm text-muted-foreground">Tiempo de estudio</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 justify-center">
+            <Button onClick={handleReset} className="bg-gradient-to-r from-blue-500 to-green-600">
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reiniciar Sesión
+            </Button>
+            <Button variant="outline" onClick={() => setShowStats(true)}>
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Ver Estadísticas Detalladas
+            </Button>
+          </div>
         </div>
       </div>
     );
