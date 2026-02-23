@@ -245,9 +245,45 @@ const initialFlashcards: Flashcard[] = [
   },
 ];
 
+const STORAGE_KEY = 'vetstudy-flashcards';
+
+const loadFlashcardsFromStorage = (): Flashcard[] | null => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Convert date strings back to Date objects
+      return parsed.map((card: any) => ({
+        ...card,
+        nextReview: new Date(card.nextReview),
+      }));
+    }
+  } catch (error) {
+    console.error('Error loading flashcards from storage:', error);
+  }
+  return null;
+};
+
+const saveFlashcardsToStorage = (flashcards: Flashcard[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(flashcards));
+  } catch (error) {
+    console.error('Error saving flashcards to storage:', error);
+  }
+};
+
 export const useFlashcards = () => {
   const { activeSubjects } = useSubjects();
-  const [flashcards, setFlashcards] = useState<Flashcard[]>(() => generateFlashcardsForSubjects(activeSubjects));
+  
+  // Initialize flashcards from localStorage or generate new ones
+  const [flashcards, setFlashcards] = useState<Flashcard[]>(() => {
+    const saved = loadFlashcardsFromStorage();
+    if (saved && saved.length > 0) {
+      return saved;
+    }
+    return generateFlashcardsForSubjects(activeSubjects);
+  });
+  
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [studySession, setStudySession] = useState({
@@ -255,6 +291,11 @@ export const useFlashcards = () => {
     cardsStudied: 0,
     correctAnswers: 0,
   });
+
+  // Persist flashcards to localStorage whenever they change
+  useEffect(() => {
+    saveFlashcardsToStorage(flashcards);
+  }, [flashcards]);
 
   const currentCard = flashcards[currentCardIndex];
   const cardsToReview = flashcards.filter(card => 
