@@ -154,24 +154,24 @@ const FlashcardsPage: React.FC = () => {
                         <>
                           <div className="flex items-center justify-center mb-4">
                             <Eye className="h-6 w-6 text-blue-500 mr-2" />
-                            <span className="text-sm font-medium text-blue-500">Respuesta</span>
+                            <span className="text-sm font-medium text-blue-500">Pregunta</span>
                           </div>
-                          <h3 className="text-lg font-medium text-foreground leading-relaxed">
-                            {currentCard.back}
+                          <h3 className="text-xl font-semibold text-foreground leading-relaxed">
+                            {currentCard.front}
                           </h3>
+                          <p className="text-sm text-muted-foreground mt-4">
+                            Haz clic para ver la respuesta
+                          </p>
                         </>
                       ) : (
                         <>
                           <div className="flex items-center justify-center mb-4">
                             <EyeOff className="h-6 w-6 text-purple-500 mr-2" />
-                            <span className="text-sm font-medium text-purple-500">Pregunta</span>
+                            <span className="text-sm font-medium text-purple-500">Respuesta</span>
                           </div>
-                          <h3 className="text-xl font-semibold text-foreground mb-4">
-                            {currentCard.front}
+                          <h3 className="text-lg font-medium text-foreground mb-4 leading-relaxed">
+                            {currentCard.back}
                           </h3>
-                          <p className="text-sm text-muted-foreground">
-                            Haz clic para ver la respuesta
-                          </p>
                         </>
                       )}
                     </div>

@@ -114,10 +114,10 @@ const generateFlashcardsForSubjects = (subjects: any[]): Flashcard[] => {
         );
         break;
         
-      case 'literature':
+      case 'literature-cinema':
         allFlashcards.push(
           {
-            id: 'literature-1',
+            id: 'literature-cinema-1',
             front: '¿Cuáles son los principales géneros literarios?',
             back: 'Los tres grandes géneros son: 1) Lírico (expresión de sentimientos, poesía), 2) Narrativo (relato de historias, novela, cuento), 3) Dramático (obras teatrales, diálogo entre personajes). Cada género tiene características y subgéneros específicos.',
             subject: subject.name,
@@ -129,7 +129,7 @@ const generateFlashcardsForSubjects = (subjects: any[]): Flashcard[] => {
             isStudying: false,
           },
           {
-            id: 'literature-2',
+            id: 'literature-cinema-2',
             front: '¿Qué es el narrador y qué tipos existen?',
             back: 'El narrador es la voz que cuenta la historia. Tipos principales: 1) Primera persona ("yo"), 2) Tercera persona limitada (sabe pensamientos de un personaje), 3) Tercera persona omnisciente (sabe todo), 4) Segunda persona ("tú", poco común).',
             subject: subject.name,
@@ -139,14 +139,9 @@ const generateFlashcardsForSubjects = (subjects: any[]): Flashcard[] => {
             easeFactor: 2.5,
             nextReview: new Date(),
             isStudying: false,
-          }
-        );
-        break;
-        
-      case 'cinematography':
-        allFlashcards.push(
+          },
           {
-            id: 'cinematography-1',
+            id: 'literature-cinema-3',
             front: '¿Cuáles son los tipos básicos de planos cinematográficos?',
             back: 'Planos principales: 1) Gran plano (detalle), 2) Primer plano (rostro), 3) Plano medio (cintura arriba), 4) Plano entero (cuerpo completo), 5) Plano general (contexto completo), 6) Gran plano general (vista amplia del entorno).',
             subject: subject.name,
@@ -158,7 +153,7 @@ const generateFlashcardsForSubjects = (subjects: any[]): Flashcard[] => {
             isStudying: false,
           },
           {
-            id: 'cinematography-2',
+            id: 'literature-cinema-4',
             front: '¿Qué es el montaje paralelo y para qué se usa?',
             back: 'El montaje paralelo muestra dos o más acciones simultáneas en diferentes lugares, creando tensión o revelando conexiones. Ejemplo: héroe corriendo a rescatar vs bomba haciendo cuenta regresiva. Crea ritmo y significado a través de yuxtaposición.',
             subject: subject.name,

@@ -139,8 +139,7 @@ const TutorPage: React.FC = () => {
             <CardHeader>
               <CardTitle>Sugerencias</CardTitle>
               <CardDescription>
-                Preguntas frecuentes sobre {selectedSubject === 'virology' ? 'Virología' : 
-                                       selectedSubject === 'parasitology' ? 'Parasitología' : 'Anatomía'}
+                Preguntas frecuentes sobre {subjects.find(s => s.id === selectedSubject)?.name || 'General'}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -168,8 +167,7 @@ const TutorPage: React.FC = () => {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Materia activa</span>
                 <span className="font-medium">
-                  {selectedSubject === 'virology' ? 'Virología' : 
-                   selectedSubject === 'parasitology' ? 'Parasitología' : 'Anatomía'}
+                  {subjects.find(s => s.id === selectedSubject)?.name || 'General'}
                 </span>
               </div>
               <div className="flex justify-between text-sm">

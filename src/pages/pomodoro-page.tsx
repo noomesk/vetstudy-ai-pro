@@ -99,7 +99,7 @@ const PomodoroPage: React.FC = () => {
               <select
                 value={selectedSubject}
                 onChange={(e) => setSelectedSubject(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
               >
                 {activeSubjects.map((subject) => (
                   <option key={subject.id} value={subject.name}>
@@ -107,6 +107,35 @@ const PomodoroPage: React.FC = () => {
                   </option>
                 ))}
               </select>
+            </CardContent>
+          </Card>
+
+          {/* Subject Stats */}
+          <Card className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
+                <Target className="h-5 w-5" />
+                Estudiando: {selectedSubject || 'General'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="text-center">
+                <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+                  {Math.round(sessions
+                    .filter(s => s.subject === selectedSubject && s.type === 'work')
+                    .reduce((acc, s) => acc + s.duration, 0) / 60)} min
+                </p>
+                <p className="text-sm text-muted-foreground">dedicados hoy</p>
+              </div>
+              <div className="border-t pt-3">
+                <p className="text-sm text-center italic text-orange-600 dark:text-orange-400">
+                  {sessions.filter(s => s.subject === selectedSubject).length === 0 
+                    ? "¡Comienza tu primera sesión de enfoque! 🚀" 
+                    : sessions.filter(s => s.subject === selectedSubject && s.type === 'work').length < 3
+                    ? "¡Buen comienzo! Sigue así 💪" 
+                    : "¡Increíble dedicación! Eres imparable 🔥"}
+                </p>
+              </div>
             </CardContent>
           </Card>
 
