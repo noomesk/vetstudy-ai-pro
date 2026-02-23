@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useSubjects } from '@/hooks/use-subjects';
+import { useFlashcards } from '@/hooks/use-flashcards';
+import { useQuizzes } from '@/hooks/use-quizzes';
+import { usePomodoro } from '@/hooks/use-pomodoro';
 import { 
   Brain, 
   BookOpen, 
@@ -19,12 +22,15 @@ import {
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { activeSubjects } = useSubjects();
+  const { stats: flashcardStats, cardsToReview } = useFlashcards();
+  const { stats: quizStats, attempts } = useQuizzes();
+  const { stats: pomodoroStats, sessions } = usePomodoro();
   
   const stats = [
     {
       title: "Tarjetas para repasar hoy",
-      value: "23",
-      description: "Repetición espaciada",
+      value: flashcardStats.toReview.toString(),
+      description: `${flashcardStats.total} tarjetas totales`,
       icon: BookOpen,
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-50 dark:bg-blue-950",
@@ -32,8 +38,8 @@ const Dashboard: React.FC = () => {
     },
     {
       title: "Sesiones de estudio esta semana",
-      value: "12",
-      description: "Total: 6.5 horas",
+      value: pomodoroStats.weekPomodoros.toString(),
+      description: `Total: ${Math.round(pomodoroStats.weekTotalTime / 60 * 10) / 10} horas`,
       icon: Clock,
       color: "from-green-500 to-green-600",
       bgColor: "bg-green-50 dark:bg-green-950",
@@ -41,8 +47,8 @@ const Dashboard: React.FC = () => {
     },
     {
       title: "Progreso general",
-      value: "78%",
-      description: "+5% esta semana",
+      value: quizStats.totalAttempts > 0 ? `${Math.round(quizStats.averageScore)}%` : "0%",
+      description: `${quizStats.totalAttempts} quizzes completados`,
       icon: TrendingUp,
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-50 dark:bg-purple-950",
@@ -132,7 +138,7 @@ const Dashboard: React.FC = () => {
               <BookOpen className="mr-3 h-4 w-4 text-blue-500" />
               Repasar Flashcards
               <span className="ml-auto bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-2 py-1 rounded-full text-xs font-medium">
-                23 pendientes
+                {flashcardStats.toReview} pendientes
               </span>
             </Button>
             <Button 
