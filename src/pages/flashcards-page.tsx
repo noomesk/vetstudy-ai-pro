@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useFlashcards } from '@/hooks/use-flashcards';
@@ -49,13 +49,16 @@ const FlashcardsPage: React.FC = () => {
 
   const [showCompletionScreen, setShowCompletionScreen] = useState(false);
 
+  // Detectar cuando se completan todas las tarjetas
+  useEffect(() => {
+    if (!currentCard && studySession.cardsStudied > 0 && cardsToReview.length > 0) {
+      setShowCompletionScreen(true);
+    }
+  }, [currentCard, studySession.cardsStudied, cardsToReview.length]);
+
   const handleDifficultyRating = (difficulty: 'easy' | 'medium' | 'hard') => {
     const quality = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 3 : 1;
     rateCard(quality);
-    // Check if this was the last card
-    if (currentCardIndex >= cardsToReview.length - 1) {
-      setShowCompletionScreen(true);
-    }
   };
 
   const handleReset = () => {
