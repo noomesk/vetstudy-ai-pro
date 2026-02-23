@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSubjects } from './use-subjects';
 
 export interface Flashcard {
@@ -279,6 +279,11 @@ export const useFlashcards = () => {
     return generateFlashcardsForSubjects(activeSubjects);
   });
   
+  // State for subject filtering
+  const [selectedSubject, setSelectedSubject] = useState<string>(() => {
+    return activeSubjects.length > 0 ? activeSubjects[0].id : 'general';
+  });
+  
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [studySession, setStudySession] = useState({
@@ -292,18 +297,81 @@ export const useFlashcards = () => {
     saveFlashcardsToStorage(flashcards);
   }, [flashcards]);
 
-  const currentCard = flashcards[currentCardIndex];
-  const cardsToReview = flashcards.filter(card => 
+  // Filter cards by selected subject
+  const filteredCards = useMemo(() => {
+    if (selectedSubject === 'all') {
+      return flashcards;
+    }
+    return flashcards.filter(card => {
+      const cardSubjectId = activeSubjects.find(s => 
+        card.subject.toLowerCase().includes(s.name.toLowerCase()) ||
+        s.name.toLowerCase().includes(card.subject.toLowerCase())
+      )?.id;
+      return cardSubjectId === selectedSubject || card.subject === selectedSubject;
+    });
+  }, [flashcards, selectedSubject, activeSubjects]);
+
+  const cardsToReview = filteredCards.filter(card => 
     new Date(card.nextReview) <= new Date()
   );
+
+  const currentCard = cardsToReview[currentCardIndex] || filteredCards[currentCardIndex];
+
+  // Stats by subject
+  const getStatsBySubject = useCallback((subjectId: string) => {
+    const subjectCards = flashcards.filter(card => {
+      const cardSubjectId = activeSubjects.find(s => 
+        card.subject.toLowerCase().includes(s.name.toLowerCase()) ||
+        s.name.toLowerCase().includes(card.subject.toLowerCase())
+      )?.id;
+      return cardSubjectId === subjectId || card.subject === subjectId;
+    });
+    
+    return {
+      total: subjectCards.length,
+      mastered: subjectCards.filter(card => card.interval >= 21).length,
+      learning: subjectCards.filter(card => card.interval > 1 && card.interval < 21).length,
+      toReview: subjectCards.filter(card => new Date(card.nextReview) <= new Date()).length,
+    };
+  }, [flashcards, activeSubjects]);
 
   const stats: FlashcardStats = {
     total: flashcards.length,
     mastered: flashcards.filter(card => card.interval >= 21).length,
     learning: flashcards.filter(card => card.interval > 1 && card.interval < 21).length,
     toReview: cardsToReview.length,
-    streak: 7, // Mock data
+    streak: 7,
   };
+
+  // Function to add new flashcard
+  const addFlashcard = useCallback((front: string, back: string, subject: string) => {
+    const newCard: Flashcard = {
+      id: `custom-${Date.now()}`,
+      front,
+      back,
+      subject,
+      difficulty: 'medium',
+      interval: 1,
+      repetition: 0,
+      easeFactor: 2.5,
+      nextReview: new Date(),
+      isStudying: false,
+    };
+    
+    setFlashcards(prev => [...prev, newCard]);
+    return newCard;
+  }, []);
+
+  // Get current card subject name
+  const getCurrentCardSubjectName = useCallback(() => {
+    if (!currentCard) return 'General';
+    const subject = activeSubjects.find(s => 
+      currentCard.subject.toLowerCase().includes(s.name.toLowerCase()) ||
+      s.name.toLowerCase().includes(currentCard.subject.toLowerCase()) ||
+      s.id === currentCard.subject
+    );
+    return subject?.name || currentCard.subject || 'General';
+  }, [currentCard, activeSubjects]);
 
   const calculateNextReview = useCallback((card: Flashcard, quality: number) => {
     const { interval, repetition, easeFactor } = card;
@@ -418,6 +486,11 @@ export const useFlashcards = () => {
     stats,
     studySession,
     cardsToReview,
+    selectedSubject,
+    setSelectedSubject,
+    addFlashcard,
+    getStatsBySubject,
+    getCurrentCardSubjectName,
     rateCard,
     flipCard,
     nextCard,

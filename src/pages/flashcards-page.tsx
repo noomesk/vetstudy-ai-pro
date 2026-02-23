@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useFlashcards } from '@/hooks/use-flashcards';
+import { useSubjects } from '@/hooks/use-subjects';
 import { 
   BookOpen, 
   Clock, 
@@ -15,10 +16,12 @@ import {
   ThumbsUp,
   ThumbsDown,
   Plus,
-  BarChart3
+  BarChart3,
+  X
 } from 'lucide-react';
 
 const FlashcardsPage: React.FC = () => {
+  const { activeSubjects } = useSubjects();
   const {
     currentCard,
     currentCardIndex,
@@ -26,6 +29,11 @@ const FlashcardsPage: React.FC = () => {
     stats,
     studySession,
     cardsToReview,
+    selectedSubject,
+    setSelectedSubject,
+    addFlashcard,
+    getStatsBySubject,
+    getCurrentCardSubjectName,
     rateCard,
     flipCard,
     nextCard,
@@ -36,6 +44,8 @@ const FlashcardsPage: React.FC = () => {
   } = useFlashcards();
 
   const [showStats, setShowStats] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newCard, setNewCard] = useState({ front: '', back: '', subject: '' });
 
   const handleDifficultyRating = (difficulty: 'easy' | 'medium' | 'hard') => {
     const quality = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 3 : 1;
@@ -75,6 +85,26 @@ const FlashcardsPage: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Subject Selector */}
+      <div className="flex items-center gap-4 bg-muted p-4 rounded-lg">
+        <label className="font-medium">Materia:</label>
+        <select 
+          value={selectedSubject}
+          onChange={(e) => {
+            setSelectedSubject(e.target.value);
+            resetSession();
+          }}
+          className="flex-1 px-3 py-2 rounded-md border bg-background text-foreground text-gray-900"
+        >
+          <option value="all">Todas las materias</option>
+          {activeSubjects.map(subject => (
+            <option key={subject.id} value={subject.id}>
+              {subject.icon} {subject.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Stats */}
@@ -132,6 +162,29 @@ const FlashcardsPage: React.FC = () => {
         </Card>
       </div>
 
+      {showStats && (
+        <div className="bg-muted p-6 rounded-lg space-y-4">
+          <h3 className="text-lg font-semibold">Estadísticas por Materia</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-background p-4 rounded-lg">
+              <p className="text-sm text-muted-foreground">Seleccionada</p>
+              <p className="text-2xl font-bold">{getStatsBySubject(selectedSubject).toReview}</p>
+              <p className="text-xs text-muted-foreground">por repasar</p>
+            </div>
+            <div className="bg-background p-4 rounded-lg">
+              <p className="text-sm text-muted-foreground">Dominadas</p>
+              <p className="text-2xl font-bold text-green-600">{getStatsBySubject(selectedSubject).mastered}</p>
+              <p className="text-xs text-muted-foreground">en esta materia</p>
+            </div>
+            <div className="bg-background p-4 rounded-lg">
+              <p className="text-sm text-muted-foreground">En aprendizaje</p>
+              <p className="text-2xl font-bold text-orange-600">{getStatsBySubject(selectedSubject).learning}</p>
+              <p className="text-xs text-muted-foreground">en esta materia</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Flashcard Study Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
@@ -142,10 +195,7 @@ const FlashcardsPage: React.FC = () => {
                 Sesión de Estudio
               </CardTitle>
               <CardDescription>
-                Tarjeta {currentCardIndex + 1} de {cardsToReview.length} - {
-                  currentCard.subject === 'virology' ? 'Virología' : 
-                  currentCard.subject === 'parasitology' ? 'Parasitología' : 'Anatomía'
-                }
+                Tarjeta {currentCardIndex + 1} de {cardsToReview.length} - {getCurrentCardSubjectName()}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
@@ -295,7 +345,7 @@ const FlashcardsPage: React.FC = () => {
               <Button 
                 className="w-full" 
                 variant="outline"
-                onClick={() => alert('Función de crear flashcard - próximamente')}
+                onClick={() => setShowCreateForm(true)}
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Crear Nueva Flashcard
@@ -316,6 +366,69 @@ const FlashcardsPage: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {/* Modal para crear flashcard */}
+      {showCreateForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Crear Nueva Flashcard</CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => setShowCreateForm(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Pregunta (Frente)</label>
+                <textarea
+                  value={newCard.front}
+                  onChange={(e) => setNewCard({ ...newCard, front: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md min-h-[80px] text-foreground bg-background"
+                  placeholder="Escribe la pregunta..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Respuesta (Reverso)</label>
+                <textarea
+                  value={newCard.back}
+                  onChange={(e) => setNewCard({ ...newCard, back: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md min-h-[80px] text-foreground bg-background"
+                  placeholder="Escribe la respuesta..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Materia</label>
+                <select
+                  value={newCard.subject}
+                  onChange={(e) => setNewCard({ ...newCard, subject: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md text-foreground bg-background"
+                >
+                  <option value="">Selecciona una materia</option>
+                  {activeSubjects.map(subject => (
+                    <option key={subject.id} value={subject.name}>
+                      {subject.icon} {subject.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <Button 
+                className="w-full" 
+                onClick={() => {
+                  if (newCard.front && newCard.back && newCard.subject) {
+                    addFlashcard(newCard.front, newCard.back, newCard.subject);
+                    setNewCard({ front: '', back: '', subject: '' });
+                    setShowCreateForm(false);
+                  }
+                }}
+                disabled={!newCard.front || !newCard.back || !newCard.subject}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Crear Flashcard
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
