@@ -6,6 +6,7 @@ import { useSubjects } from '@/hooks/use-subjects';
 import { useFlashcards } from '@/hooks/use-flashcards';
 import { useQuizzes } from '@/hooks/use-quizzes';
 import { usePomodoro } from '@/hooks/use-pomodoro';
+import { useActivity } from '@/hooks/use-activity';
 import { 
   Brain, 
   BookOpen, 
@@ -25,6 +26,7 @@ const Dashboard: React.FC = () => {
   const { stats: flashcardStats, cardsToReview } = useFlashcards();
   const { stats: quizStats, attempts } = useQuizzes();
   const { stats: pomodoroStats, sessions } = usePomodoro();
+  const { activities: recentActivities } = useActivity();
   
   const stats = [
     {
@@ -63,13 +65,6 @@ const Dashboard: React.FC = () => {
       bgColor: "bg-orange-50 dark:bg-orange-950",
       textColor: "text-orange-600 dark:text-orange-400"
     }
-  ];
-
-  const recentActivity = [
-    { time: "Hace 2 horas", activity: "Completado quiz de Virología", score: "85%", trend: "up" },
-    { time: "Hace 5 horas", activity: "Sesión de flashcards", cards: "15 tarjetas", trend: "neutral" },
-    { time: "Ayer", activity: "Nuevo contenido añadido", topic: "Retrovirus", trend: "neutral" },
-    { time: "Ayer", activity: "Sesión Pomodoro", duration: "25 minutos", trend: "up" },
   ];
 
   return (
@@ -177,23 +172,30 @@ const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors duration-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <div>
-                      <p className="font-medium text-foreground text-sm">{activity.activity}</p>
-                      <p className="text-muted-foreground text-xs">
-                        {activity.score || activity.cards || activity.topic || activity.duration}
-                      </p>
+              {recentActivities.length > 0 ? (
+                recentActivities.map((activity, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors duration-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <div>
+                        <p className="font-medium text-foreground text-sm">{activity.title}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {activity.score || activity.detail || activity.duration}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {activity.trend === 'up' && <ArrowUp className="h-3 w-3 text-green-500" />}
+                      <span className="text-xs text-muted-foreground">{activity.time}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {activity.trend === 'up' && <ArrowUp className="h-3 w-3 text-green-500" />}
-                    <span className="text-xs text-muted-foreground">{activity.time}</span>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No hay actividad reciente</p>
+                  <p className="text-xs mt-1">Comienza a estudiar para ver tu progreso</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
