@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useFlashcards } from '@/hooks/use-flashcards';
@@ -13,7 +13,9 @@ import {
   Eye,
   EyeOff,
   ThumbsUp,
-  ThumbsDown
+  ThumbsDown,
+  Plus,
+  BarChart3
 } from 'lucide-react';
 
 const FlashcardsPage: React.FC = () => {
@@ -32,6 +34,8 @@ const FlashcardsPage: React.FC = () => {
     getSessionTime,
     getSessionProgress,
   } = useFlashcards();
+
+  const [showStats, setShowStats] = useState(false);
 
   const handleDifficultyRating = (difficulty: 'easy' | 'medium' | 'hard') => {
     const quality = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 3 : 1;
@@ -261,10 +265,10 @@ const FlashcardsPage: React.FC = () => {
                   <span>Tarjetas repasadas</span>
                   <span className="font-medium">{getSessionProgress()} / {cardsToReview.length}</span>
                 </div>
-                <div className="w-full bg-muted rounded-full h-2">
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                   <div 
                     className="bg-gradient-to-r from-blue-500 to-green-600 h-2 rounded-full transition-all duration-500" 
-                    style={{ width: `${(getSessionProgress() / cardsToReview.length) * 100}%` }}
+                    style={{ width: `${Math.min((getSessionProgress() / Math.max(cardsToReview.length, 1)) * 100, 100)}%` }}
                   ></div>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -288,13 +292,21 @@ const FlashcardsPage: React.FC = () => {
               <CardTitle>Acciones Rápidas</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button className="w-full" variant="outline">
-                <BookOpen className="mr-2 h-4 w-4" />
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => alert('Función de crear flashcard - próximamente')}
+              >
+                <Plus className="mr-2 h-4 w-4" />
                 Crear Nueva Flashcard
               </Button>
-              <Button className="w-full" variant="outline">
-                <Target className="mr-2 h-4 w-4" />
-                Ver Estadísticas
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => setShowStats(!showStats)}
+              >
+                <BarChart3 className="mr-2 h-4 w-4" />
+                {showStats ? 'Ocultar' : 'Ver'} Estadísticas
               </Button>
               <Button className="w-full" variant="outline" onClick={resetSession}>
                 <RotateCcw className="mr-2 h-4 w-4" />

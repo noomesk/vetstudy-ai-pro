@@ -1,47 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSubjects, Subject } from './use-subjects';
 
-const CHAT_STORAGE_KEY = 'vetstudy-chat-history';
-
-interface ChatHistory {
-  [subjectId: string]: Message[];
-}
-
-const loadChatHistory = (): ChatHistory => {
-  try {
-    const saved = localStorage.getItem(CHAT_STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // Convert date strings back to Date objects
-      Object.keys(parsed).forEach(subjectId => {
-        parsed[subjectId] = parsed[subjectId].map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp),
-        }));
-      });
-      return parsed;
-    }
-  } catch (error) {
-    console.error('Error loading chat history:', error);
-  }
-  return {};
-};
-
-const saveChatHistory = (history: ChatHistory) => {
-  try {
-    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(history));
-  } catch (error) {
-    console.error('Error saving chat history:', error);
-  }
-};
-
-const getDefaultMessage = (subjectName: string): Message => ({
-  id: '1',
-  role: 'assistant',
-  content: `¡Hola! Estoy aquí para ayudarte con **${subjectName}**. ¿Qué tema te gustaría explorar hoy?`,
-  timestamp: new Date(),
-});
-
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -52,44 +11,27 @@ export interface Message {
 
 export const useChat = () => {
   const { activeSubjects } = useSubjects();
-  const [chatHistory, setChatHistory] = useState<ChatHistory>(loadChatHistory);
-  const [selectedSubject, setSelectedSubject] = useState<string>('virology');
   
-  // Get messages for current subject from history
-  const getSubjectMessages = useCallback((subjectId: string): Message[] => {
-    const subject = activeSubjects.find(s => s.id === subjectId);
-    const subjectName = subject?.name || 'General';
-    
-    if (chatHistory[subjectId] && chatHistory[subjectId].length > 0) {
-      return chatHistory[subjectId];
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      role: 'assistant',
+      content: '¡Hola! Soy tu tutor de estudio universitario de élite. Estoy aquí para ayudarte a comprender profundamente los temas de tu programa. ¿En qué materia te gustaría trabajar hoy? Puedes preguntarme sobre conceptos específicos, procesos, mecanismos, o pedirme que amplíe cualquier tema.',
+      timestamp: new Date(),
     }
-    
-    // Return default welcome message for new chats
-    return [getDefaultMessage(subjectName)];
-  }, [chatHistory, activeSubjects]);
-  
-  const [messages, setMessages] = useState<Message[]>(() => getSubjectMessages('virology'));
+  ]);
   
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedSubject, setSelectedSubject] = useState<string>('virology');
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Update messages when subject changes
   useEffect(() => {
-    setMessages(getSubjectMessages(selectedSubject));
-  }, [selectedSubject, getSubjectMessages]);
-
-  // Save messages to history whenever they change
-  useEffect(() => {
-    if (messages.length > 0) {
-      setChatHistory(prev => {
-        const updated = { ...prev, [selectedSubject]: messages };
-        saveChatHistory(updated);
-        return updated;
-      });
+    if (!selectedSubject && activeSubjects.length > 0) {
+      setSelectedSubject(activeSubjects[0].id);
     }
-  }, [messages, selectedSubject]);
+  }, [selectedSubject, activeSubjects]);
 
   const suggestedQuestions = [
     'Explícame los conceptos fundamentales de esta materia',
@@ -206,18 +148,16 @@ export const useChat = () => {
   }, [messages]);
 
   const clearConversation = useCallback(() => {
-    const subject = activeSubjects.find(s => s.id === selectedSubject);
-    const subjectName = subject?.name || 'General';
-    const newMessages = [getDefaultMessage(subjectName)];
-    
-    setMessages(newMessages);
-    setChatHistory(prev => {
-      const updated = { ...prev, [selectedSubject]: newMessages };
-      saveChatHistory(updated);
-      return updated;
-    });
+    setMessages([
+      {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: 'Conversación reiniciada. ¿En qué tema te gustaría profundizar ahora?',
+        timestamp: new Date(),
+      }
+    ]);
     setError(null);
-  }, [selectedSubject, activeSubjects]);
+  }, []);
 
   return {
     messages,

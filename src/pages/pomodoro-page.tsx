@@ -130,10 +130,10 @@ const PomodoroPage: React.FC = () => {
               <div className="border-t pt-3">
                 <p className="text-sm text-center italic text-orange-600 dark:text-orange-400">
                   {sessions.filter(s => s.subject === selectedSubject).length === 0 
-                    ? "¡Comienza tu primera sesión de enfoque! 🚀" 
+                    ? "¡Comienza tu primera sesión de enfoque!" 
                     : sessions.filter(s => s.subject === selectedSubject && s.type === 'work').length < 3
-                    ? "¡Buen comienzo! Sigue así 💪" 
-                    : "¡Increíble dedicación! Eres imparable 🔥"}
+                    ? "¡Buen comienzo! Sigue así" 
+                    : "¡Increíble dedicación! Eres imparable"}
                 </p>
               </div>
             </CardContent>
