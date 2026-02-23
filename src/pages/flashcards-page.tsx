@@ -23,6 +23,7 @@ import {
 const FlashcardsPage: React.FC = () => {
   const { activeSubjects } = useSubjects();
   const {
+    flashcards,
     currentCard,
     currentCardIndex,
     showAnswer,
@@ -34,18 +35,34 @@ const FlashcardsPage: React.FC = () => {
     addFlashcard,
     getStatsBySubject,
     getCurrentCardSubjectName,
+    regenerateFlashcards,
     rateCard,
     flipCard,
     nextCard,
     previousCard,
     resetSession,
     getSessionTime,
-    getSessionProgress,
   } = useFlashcards();
 
   const [showStats, setShowStats] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newCard, setNewCard] = useState({ front: '', back: '', subject: '' });
+  const [cardTime, setCardTime] = useState(0);
+
+  // Timer por tarjeta
+  useEffect(() => {
+    if (!showAnswer) {
+      const interval = setInterval(() => {
+        setCardTime(prev => prev + 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [showAnswer]);
+
+  // Resetear timer al cambiar de tarjeta
+  useEffect(() => {
+    setCardTime(0);
+  }, [currentCardIndex]);
 
   const [showCompletionScreen, setShowCompletionScreen] = useState(false);
 
@@ -132,7 +149,7 @@ const FlashcardsPage: React.FC = () => {
       </div>
 
       {/* Subject Selector */}
-      <div className="flex items-center gap-4 bg-muted p-4 rounded-lg">
+      <div className="flex items-center gap-4 bg-muted p-4 rounded-lg flex-wrap">
         <label className="font-medium">Materia:</label>
         <select 
           value={selectedSubject}
@@ -140,7 +157,7 @@ const FlashcardsPage: React.FC = () => {
             setSelectedSubject(e.target.value);
             resetSession();
           }}
-          className="flex-1 px-3 py-2 rounded-md border bg-background text-foreground text-gray-900"
+          className="flex-1 px-3 py-2 rounded-md border bg-background text-foreground text-gray-900 min-w-[200px]"
         >
           <option value="all">Todas las materias</option>
           {activeSubjects.map(subject => (
@@ -149,6 +166,19 @@ const FlashcardsPage: React.FC = () => {
             </option>
           ))}
         </select>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => {
+            if (confirm('Esto borrará todas las flashcards existentes y creará nuevas. ¿Continuar?')) {
+              regenerateFlashcards();
+            }
+          }}
+          className="whitespace-nowrap"
+        >
+          <RotateCcw className="mr-2 h-4 w-4" />
+          Regenerar Flashcards ({flashcards.length} total)
+        </Button>
       </div>
 
       {/* Stats */}
@@ -357,17 +387,17 @@ const FlashcardsPage: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span>Tarjetas repasadas</span>
-                  <span className="font-medium">{getSessionProgress()} / {cardsToReview.length}</span>
+                  <span className="font-medium">{currentCardIndex} / {cardsToReview.length}</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                   <div 
                     className="bg-gradient-to-r from-blue-500 to-green-600 h-2 rounded-full transition-all duration-500" 
-                    style={{ width: `${Math.min((getSessionProgress() / Math.max(cardsToReview.length, 1)) * 100, 100)}%` }}
+                    style={{ width: `${Math.min((currentCardIndex / Math.max(cardsToReview.length, 1)) * 100, 100)}%` }}
                   ></div>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span>Tiempo de estudio</span>
-                  <span className="font-medium">{getSessionTime()}</span>
+                  <span>Tiempo en esta tarjeta</span>
+                  <span className="font-medium">{Math.floor(cardTime / 60)}:{(cardTime % 60).toString().padStart(2, '0')}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Tasa de éxito</span>

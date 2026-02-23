@@ -886,6 +886,30 @@ export const useFlashcards = () => {
     return reviewedCards.length;
   }, [flashcards, currentCardIndex]);
 
+  // Función para regenerar todas las flashcards
+  const regenerateFlashcards = useCallback(() => {
+    localStorage.removeItem('vetstudy-flashcards');
+    const newFlashcards = generateFlashcardsForSubjects(activeSubjects);
+    setFlashcards(newFlashcards);
+    setCurrentCardIndex(0);
+    setShowAnswer(false);
+    resetSession();
+  }, [activeSubjects, resetSession]);
+
+  // Tracking de tiempo por tarjeta
+  const [cardStartTime, setCardStartTime] = useState<Date>(new Date());
+
+  const getCardTime = useCallback(() => {
+    const now = new Date();
+    const diff = now.getTime() - cardStartTime.getTime();
+    const seconds = Math.floor(diff / 1000);
+    return seconds;
+  }, [cardStartTime]);
+
+  const resetCardTimer = useCallback(() => {
+    setCardStartTime(new Date());
+  }, []);
+
   return {
     flashcards,
     currentCard,
@@ -899,6 +923,9 @@ export const useFlashcards = () => {
     addFlashcard,
     getStatsBySubject,
     getCurrentCardSubjectName,
+    regenerateFlashcards,
+    getCardTime,
+    resetCardTimer,
     rateCard,
     flipCard,
     nextCard,
