@@ -1,14 +1,17 @@
 import React from 'react';
-import { Home, Brain, BookOpen, FileText, BarChart3, Timer, User, Settings, Sparkles } from 'lucide-react';
+import { Home, Brain, BookOpen, FileText, BarChart3, Timer, User, Settings, Sparkles, LogIn, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ThemeToggle from '@/components/ui/theme-toggle';
+import { User as UserType } from '../../hooks/use-auth';
 
 interface SidebarProps {
   activeModule?: string;
   onModuleChange?: (module: string) => void;
+  user?: UserType | null;
+  onAuthClick?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeModule = 'dashboard', onModuleChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeModule = 'dashboard', onModuleChange, user, onAuthClick }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'tutor', label: 'Tutor IA', icon: Brain },
@@ -62,14 +65,37 @@ const Sidebar: React.FC<SidebarProps> = ({ activeModule = 'dashboard', onModuleC
       </nav>
       
       <div className="absolute bottom-4 left-4 right-4">
-        <div className="p-3 rounded-lg bg-muted/50 border border-border">
-          <div className="text-xs text-muted-foreground">
-            <p className="font-medium text-foreground">Estudiante: Usuario Demo</p>
-            <p>Materias: <span className="text-blue-500 font-medium">3 activas</span></p>
-            <div className="mt-2 pt-2 border-t border-border">
-              <p className="text-green-500">● Online</p>
+        <div className="bg-muted/50 rounded-lg p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <User className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="font-medium text-foreground">
+                {user ? user.name : 'Invitado'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {user ? user.email : 'No logueado'}
+              </p>
             </div>
           </div>
+          <Button 
+            onClick={onAuthClick}
+            className="w-full"
+            variant={user ? "outline" : "default"}
+          >
+            {user ? (
+              <>
+                <LogOut className="mr-2 h-4 w-4" />
+                Cerrar Sesión
+              </>
+            ) : (
+              <>
+                <LogIn className="mr-2 h-4 w-4" />
+                Iniciar Sesión
+              </>
+            )}
+          </Button>
         </div>
       </div>
     </div>

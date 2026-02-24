@@ -169,7 +169,7 @@ const SubjectManager: React.FC<SubjectManagerProps> = ({ onClose }) => {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Ej: Matemáticas, Historia, etc."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
                     required
                   />
                 </div>
@@ -181,7 +181,7 @@ const SubjectManager: React.FC<SubjectManagerProps> = ({ onClose }) => {
                   <select
                     value={formData.color}
                     onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
                   >
                     {getAvailableColors().map(color => (
                       <option key={color} value={color}>
@@ -223,7 +223,7 @@ const SubjectManager: React.FC<SubjectManagerProps> = ({ onClose }) => {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Breve descripción de la materia..."
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
                 />
               </div>
 
