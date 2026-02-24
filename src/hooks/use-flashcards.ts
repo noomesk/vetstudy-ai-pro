@@ -22,6 +22,22 @@ export interface FlashcardStats {
   streak: number;
 }
 
+export interface DailyProgress {
+  date: string; // YYYY-MM-DD
+  subjectId: string;
+  subjectName: string;
+  cardsStudied: number;
+  correctAnswers: number;
+  totalTime: number; // en segundos
+  accuracy: number; // porcentaje
+}
+
+export interface ProgressHistory {
+  dailyProgress: DailyProgress[];
+  lastStudyDate: string | null;
+  totalStudyDays: number;
+}
+
 const generateFlashcardsForSubjects = (subjects: any[]): Flashcard[] => {
   const allFlashcards: Flashcard[] = [];
   
@@ -725,6 +741,15 @@ export const useFlashcards = () => {
 
   const currentCard = cardsToReview[currentCardIndex] || filteredCards[currentCardIndex];
 
+  // Debug logging
+  console.log('=== Flashcard Debug ===');
+  console.log('Total flashcards:', flashcards.length);
+  console.log('Filtered cards for subject:', filteredCards.length);
+  console.log('Cards to review:', cardsToReview.length);
+  console.log('Selected subject:', selectedSubject);
+  console.log('Current card index:', currentCardIndex);
+  console.log('Current card:', currentCard?.id || 'None');
+
   // Stats by subject
   const getStatsBySubject = useCallback((subjectId: string) => {
     const subjectCards = flashcards.filter(card => {
@@ -888,13 +913,114 @@ export const useFlashcards = () => {
 
   // Función para regenerar todas las flashcards
   const regenerateFlashcards = useCallback(() => {
+    console.log('🔄 Regenerating flashcards...');
+    
+    // Limpiar completamente localStorage
     localStorage.removeItem('vetstudy-flashcards');
-    const newFlashcards = generateFlashcardsForSubjects(activeSubjects);
+    localStorage.removeItem('vetstudy-progress');
+    
+    // Generar nuevas flashcards con fecha de hoy para todas
+    const newFlashcards = generateFlashcardsForSubjects(activeSubjects).map(card => ({
+      ...card,
+      nextReview: new Date(), // Asegurar que todas estén disponibles hoy
+      interval: 1,
+      repetition: 0,
+      easeFactor: 2.5,
+    }));
+    
+    console.log(`Generated ${newFlashcards.length} flashcards`);
+    console.log('Flashcards by subject:', 
+      newFlashcards.reduce((acc, card) => {
+        acc[card.subject] = (acc[card.subject] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>)
+    );
+    
     setFlashcards(newFlashcards);
     setCurrentCardIndex(0);
     setShowAnswer(false);
     resetSession();
+    
+    // Forzar actualización inmediata
+    setTimeout(() => {
+      console.log('Flashcards after regeneration:', newFlashcards.length);
+    }, 100);
   }, [activeSubjects, resetSession]);
+
+  // Funciones para manejar progreso diario
+  const saveDailyProgress = useCallback(() => {
+    if (studySession.cardsStudied === 0) return; // No guardar si no se estudió nada
+
+    const today = new Date().toISOString().split('T')[0];
+    const currentProgress: ProgressHistory = JSON.parse(localStorage.getItem('vetstudy-progress') || '{"dailyProgress":[],"lastStudyDate":null,"totalStudyDays":0}');
+    
+    // Buscar si ya existe progreso para hoy y esta materia
+    const existingIndex = currentProgress.dailyProgress.findIndex(
+      p => p.date === today && p.subjectId === selectedSubject
+    );
+
+    const newProgress: DailyProgress = {
+      date: today,
+      subjectId: selectedSubject,
+      subjectName: getCurrentCardSubjectName(),
+      cardsStudied: studySession.cardsStudied,
+      correctAnswers: studySession.correctAnswers,
+      totalTime: Math.floor((new Date().getTime() - studySession.startTime.getTime()) / 1000),
+      accuracy: studySession.cardsStudied > 0 ? (studySession.correctAnswers / studySession.cardsStudied) * 100 : 0
+    };
+
+    if (existingIndex >= 0) {
+      // Actualizar progreso existente
+      currentProgress.dailyProgress[existingIndex] = newProgress;
+    } else {
+      // Agregar nuevo progreso
+      currentProgress.dailyProgress.push(newProgress);
+    }
+
+    // Actualizar última fecha de estudio
+    if (currentProgress.lastStudyDate !== today) {
+      currentProgress.totalStudyDays += 1;
+      currentProgress.lastStudyDate = today;
+    }
+
+    localStorage.setItem('vetstudy-progress', JSON.stringify(currentProgress));
+  }, [studySession, selectedSubject, getCurrentCardSubjectName]);
+
+  const getProgressHistory = useCallback((): ProgressHistory => {
+    return JSON.parse(localStorage.getItem('vetstudy-progress') || '{"dailyProgress":[],"lastStudyDate":null,"totalStudyDays":0}');
+  }, []);
+
+  const getProgressBySubject = useCallback((subjectId: string, days: number = 7) => {
+    const history = getProgressHistory();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    return history.dailyProgress
+      .filter(p => p.subjectId === subjectId && new Date(p.date) >= cutoffDate)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [getProgressHistory]);
+
+  const getSubjectEvolution = useCallback((subjectId: string) => {
+    const history = getProgressBySubject(subjectId, 30);
+    return history.map(p => ({
+      date: p.date,
+      accuracy: p.accuracy,
+      cardsStudied: p.cardsStudied
+    }));
+  }, [getProgressBySubject]);
+
+  // Guardar progreso automáticamente al cambiar de tarjeta o cerrar sesión
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      saveDailyProgress();
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      saveDailyProgress();
+    };
+  }, [saveDailyProgress]);
 
   // Tracking de tiempo por tarjeta
   const [cardStartTime, setCardStartTime] = useState<Date>(new Date());
@@ -933,5 +1059,9 @@ export const useFlashcards = () => {
     resetSession,
     getSessionTime,
     getSessionProgress,
+    saveDailyProgress,
+    getProgressHistory,
+    getProgressBySubject,
+    getSubjectEvolution,
   };
 };

@@ -3,21 +3,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useFlashcards } from '@/hooks/use-flashcards';
 import { useSubjects } from '@/hooks/use-subjects';
-import { 
-  BookOpen, 
-  Clock, 
-  Target, 
-  RotateCcw, 
-  CheckCircle, 
-  ArrowLeft, 
-  ArrowRight,
+import {
+  BookOpen,
+  Clock,
   Eye,
   EyeOff,
-  ThumbsUp,
-  ThumbsDown,
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
   Plus,
   BarChart3,
-  X
+  X,
+  TrendingUp,
+  CheckCircle,
+  Target,
+  ThumbsDown,
+  ThumbsUp,
+  ArrowLeft,
+  ArrowRight
 } from 'lucide-react';
 
 const FlashcardsPage: React.FC = () => {
@@ -42,10 +45,15 @@ const FlashcardsPage: React.FC = () => {
     previousCard,
     resetSession,
     getSessionTime,
+    saveDailyProgress,
+    getProgressHistory,
+    getProgressBySubject,
+    getSubjectEvolution,
   } = useFlashcards();
 
   const [showStats, setShowStats] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showProgressHistory, setShowProgressHistory] = useState(false);
   const [newCard, setNewCard] = useState({ front: '', back: '', subject: '' });
   const [cardTime, setCardTime] = useState(0);
 
@@ -122,6 +130,10 @@ const FlashcardsPage: React.FC = () => {
               <BarChart3 className="mr-2 h-4 w-4" />
               Ver Estadísticas Detalladas
             </Button>
+            <Button variant="outline" onClick={() => setShowProgressHistory(true)}>
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Ver Progreso Histórico
+            </Button>
           </div>
         </div>
       </div>
@@ -179,6 +191,15 @@ const FlashcardsPage: React.FC = () => {
           <RotateCcw className="mr-2 h-4 w-4" />
           Regenerar Flashcards ({flashcards.length} total)
         </Button>
+        <div className="text-sm text-muted-foreground bg-background px-3 py-2 rounded-md border">
+          <span className="font-medium">{cardsToReview.length}</span> para repasar de <span className="font-medium">{flashcards.filter(card => {
+            const cardSubjectId = activeSubjects.find(s => 
+              card.subject.toLowerCase().includes(s.name.toLowerCase()) ||
+              s.name.toLowerCase().includes(card.subject.toLowerCase())
+            )?.id;
+            return cardSubjectId === selectedSubject || card.subject === selectedSubject;
+          }).length}</span> en esta materia
+        </div>
       </div>
 
       {/* Stats */}
@@ -499,6 +520,107 @@ const FlashcardsPage: React.FC = () => {
                 <Plus className="mr-2 h-4 w-4" />
                 Crear Flashcard
               </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Modal de Progreso Histórico */}
+      {showProgressHistory && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-4xl max-h-[80vh] overflow-y-auto">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-green-500" />
+                  Progreso Histórico
+                </CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => setShowProgressHistory(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <CardDescription>
+                Tu evolución en el tiempo por materia
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Resumen General */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-muted p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Días de estudio</p>
+                    <p className="text-2xl font-bold">{getProgressHistory().totalStudyDays}</p>
+                  </div>
+                  <div className="bg-muted p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Último estudio</p>
+                    <p className="text-lg font-semibold">
+                      {getProgressHistory().lastStudyDate ? 
+                        new Date(getProgressHistory().lastStudyDate).toLocaleDateString('es-ES', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        }) : 
+                        'Sin estudios registrados'
+                      }
+                    </p>
+                  </div>
+                  <div className="bg-muted p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Total de sesiones</p>
+                    <p className="text-2xl font-bold">{getProgressHistory().dailyProgress.length}</p>
+                  </div>
+                </div>
+
+                {/* Progreso por Materia */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Progreso por Materia (Últimos 7 días)</h3>
+                  {activeSubjects.map(subject => {
+                    const subjectProgress = getProgressBySubject(subject.id, 7);
+                    const latestProgress = subjectProgress[subjectProgress.length - 1];
+                    
+                    return (
+                      <div key={subject.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium flex items-center gap-2">
+                            {subject.icon} {subject.name}
+                          </h4>
+                          {latestProgress && (
+                            <span className="text-sm text-muted-foreground">
+                              Último: {latestProgress.accuracy.toFixed(1)}% acierto
+                            </span>
+                          )}
+                        </div>
+                        
+                        {subjectProgress.length > 0 ? (
+                          <div className="space-y-2">
+                            {subjectProgress.map((progress, index) => (
+                              <div key={index} className="flex items-center justify-between text-sm">
+                                <span>{new Date(progress.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                                <div className="flex items-center gap-4">
+                                  <span>{progress.cardsStudied} tarjetas</span>
+                                  <div className="flex items-center gap-1">
+                                    <div className="w-20 bg-muted rounded-full h-2">
+                                      <div 
+                                        className={`h-2 rounded-full ${
+                                          progress.accuracy >= 80 ? 'bg-green-500' :
+                                          progress.accuracy >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                                        }`}
+                                        style={{ width: `${progress.accuracy}%` }}
+                                      ></div>
+                                    </div>
+                                    <span className="w-12 text-right">{progress.accuracy.toFixed(0)}%</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Sin progreso registrado en los últimos 7 días</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
