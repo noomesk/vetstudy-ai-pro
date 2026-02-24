@@ -87,6 +87,9 @@ const FlashcardsPage: React.FC = () => {
   };
 
   const handleReset = () => {
+    // Guardar progreso antes de resetear
+    saveDailyProgress();
+    console.log('💾 Progreso guardado automáticamente');
     setShowCompletionScreen(false);
     resetSession();
   };
@@ -125,6 +128,13 @@ const FlashcardsPage: React.FC = () => {
             <Button onClick={handleReset} className="bg-gradient-to-r from-blue-500 to-green-600">
               <RotateCcw className="mr-2 h-4 w-4" />
               Reiniciar Sesión
+            </Button>
+            <Button variant="outline" onClick={() => {
+              saveDailyProgress();
+              alert('✅ Progreso guardado correctamente');
+            }}>
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Guardar Progreso
             </Button>
             <Button variant="outline" onClick={() => setShowStats(true)}>
               <BarChart3 className="mr-2 h-4 w-4" />

@@ -1,12 +1,13 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../hooks/use-auth';
 import Sidebar from './sidebar';
 
 const MainLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   
-  // Extract active module from current path
   const getActiveModule = () => {
     const path = location.pathname;
     if (path.includes('/tutor')) return 'tutor';
@@ -24,18 +25,28 @@ const MainLayout: React.FC = () => {
     navigate(`/${module}`);
   };
 
+  const handleAuth = () => {
+    if (user) {
+      logout();
+      navigate('/auth');
+    } else {
+      navigate('/auth');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <Sidebar 
         activeModule={activeModule} 
-        onModuleChange={handleModuleChange} 
+        onModuleChange={handleModuleChange}
+        user={user}
+        onAuthClick={handleAuth}
       />
-      
-      <div className="ml-64 p-8">
-        <main className="max-w-7xl mx-auto">
+      <main className="lg:ml-64 transition-all duration-300">
+        <div className="p-6">
           <Outlet />
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };

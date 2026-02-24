@@ -842,6 +842,8 @@ export const useFlashcards = () => {
   const rateCard = useCallback((quality: number) => {
     if (!currentCard) return;
 
+    console.log(`📊 Calificando tarjeta ${currentCard.id} con calidad ${quality}`);
+
     const reviewData = calculateNextReview(currentCard, quality);
     
     setFlashcards(prev => prev.map(card => 
